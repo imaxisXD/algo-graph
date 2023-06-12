@@ -1,4 +1,4 @@
-import { Time } from "lightweight-charts";
+import { UTCTimestamp } from "lightweight-charts";
 
 export function ohlcDataFormatter(data: any, intervalInMins: number) {
     const ohlcData = [];
@@ -11,7 +11,7 @@ export function ohlcDataFormatter(data: any, intervalInMins: number) {
         const timestamp = new Date(data[i][0]).getTime();
         const price = data[i][1];
         if (timestamp - currentTimestamp >= intervalInMins * 60 * 1000) {
-            ohlcData.push({ "time": currentTimestamp / 1000 as Time, "open": currentOpen, "high": currentHigh, "low": currentLow, "close": currentClose });
+            ohlcData.push({ "time": currentTimestamp / 1000 as UTCTimestamp, "open": currentOpen, "high": currentHigh, "low": currentLow, "close": currentClose });
             currentTimestamp = timestamp;
             currentOpen = price;
             currentHigh = price;
@@ -23,6 +23,6 @@ export function ohlcDataFormatter(data: any, intervalInMins: number) {
             currentClose = price;
         }
     }
-    ohlcData.push({ "time": currentTimestamp / 1000 as Time, "open": currentOpen, "high": currentHigh, "low": currentLow, "close": currentClose });
+    ohlcData.push({ "time": currentTimestamp / 1000 as UTCTimestamp, "open": currentOpen, "high": currentHigh, "low": currentLow, "close": currentClose });
     return (ohlcData);
 };
