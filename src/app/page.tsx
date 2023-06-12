@@ -4,8 +4,6 @@ import Chart from './components/chart';
 import OHLC from './components/ohlc';
 
 export default function Home() {
-
-
   const plainTheme = {
     topColor: '#E1AEFF',
     bottomColor: 'transparent',
@@ -16,7 +14,6 @@ export default function Home() {
     bottomColor: 'transparent',
     lineColor: '#FF6969',
   };
-
 
 
 
@@ -34,6 +31,7 @@ export default function Home() {
         Phase III : OHLC Chart
       </h1>
       <OHLC data={chartData} fitContent={false} feature='live' />
+
     </main>
   )
 }
