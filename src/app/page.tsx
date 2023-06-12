@@ -1,6 +1,7 @@
 
 import chartData from './data/banknifty.json';
 import Chart from './components/chart';
+import OHLC from './components/ohlc';
 
 export default function Home() {
 
@@ -29,7 +30,7 @@ export default function Home() {
         Phase II : Live Price Chart
       </h1>
       <Chart data={chartData} fitContent={false} theme={liveTheme} feature='live' />
-
+      <OHLC data={chartData} fitContent={false} />
     </main>
   )
 }

@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useState } from 'react';
 import { createChart, IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
+import { ohlcDataFormatter } from '../utils/helper';
 
 type ChartData = Array<[string, number, number]>;
 
@@ -8,29 +9,35 @@ interface ChartProps {
     data: any;
     fitContent: boolean;
     theme?: {
-        topColor: string;
-        bottomColor: string;
-        lineColor: string;
+        upColor: string;
+        downColor: string;
+        borderUpColor: string;
+        borderDownColor: string;
     };
-    feature?: 'live' | 'plain' | 'ohlc';
+    feature?: 'live' | 'plain';
 }
 
-const Chart: React.FC<ChartProps> = ({ data, fitContent, theme, feature }) => {
+const OHLC: React.FC<ChartProps> = ({ data, fitContent, theme, feature }) => {
     const chartContainerRef = useRef<HTMLDivElement | null>(null);
     const chartRef = useRef<IChartApi | undefined>(undefined);
-    const seriesRef = useRef<ISeriesApi<'Area'> | undefined>(undefined);
-    const priceData = useRef<Array<{ time: UTCTimestamp; value: string | number }>>([]);
+    const seriesRef = useRef<ISeriesApi<'Candlestick'> | undefined>(undefined);
+    const ohlcData = useRef<Array<{ time: UTCTimestamp; open: number; high: number; low: number; close: number }>>([]);
+
     const [rerenderCount, setRerenderCount] = useState(0);
     const [chartData, setChartData] = useState<ChartData>(data);
+
+    const newOHLC = ohlcDataFormatter(data, 15);
 
     useEffect(() => {
         if (chartContainerRef.current && !chartRef.current) {
             chartRef.current = createChart(chartContainerRef.current, { width: 800, height: 400 });
-            seriesRef.current = chartRef.current.addAreaSeries({
-                topColor: theme?.topColor || '#00DFA2',
-                bottomColor: theme?.bottomColor || 'transparent',
-                lineColor: theme?.lineColor || '#1B9C85',
-                lineWidth: 2,
+            seriesRef.current = chartRef.current.addCandlestickSeries({
+                upColor: theme?.upColor || '#26a69a',
+                downColor: theme?.downColor || '#ef5350',
+                wickUpColor: '#26a69a',
+                wickDownColor: '#ef5350',
+                wickVisible: true,
+                borderVisible: false
             });
         }
         const currentLocale = window.navigator.languages[0];
@@ -62,47 +69,13 @@ const Chart: React.FC<ChartProps> = ({ data, fitContent, theme, feature }) => {
         }
 
         if (seriesRef.current) {
-            seriesRef.current.setData(priceData.current);
+            seriesRef.current.setData(newOHLC);
         }
         if (chartRef.current) {
             chartRef.current.timeScale().fitContent();
         }
     }, []);
 
-    // Mock WebSocket Behavior
-    useEffect(() => {
-        if (feature === 'live') {
-            const interval = setInterval(() => {
-                const lastDataPoint = chartData[chartData.length - 1];
-                const currentDate = new Date();
-                const newTimestamp = currentDate.toISOString();
-                const newValue = lastDataPoint[1] + Math.random() * 1000 - 500;
-                const newPoint: [string, number, number] = [newTimestamp, newValue, 0];
-                setChartData(prevData => [...prevData, newPoint]);
-            }, 1000);
-
-            return () => {
-                clearInterval(interval);
-            };
-        }
-    }, [chartData, feature]);
-
-    useEffect(() => {
-        if (chartRef.current && seriesRef.current) {
-            const updatedPriceData = chartData.map(([timestamp, value, _]) => ({
-                time: new Date(timestamp).getTime() / 1000 as UTCTimestamp,
-                value,
-            }));
-
-            // Update the priceData ref outside the component rendering process
-            priceData.current = updatedPriceData;
-
-            seriesRef.current.setData(priceData.current);
-            if (fitContent) {
-                chartRef.current.timeScale().fitContent();
-            }
-        }
-    }, [chartData, fitContent]);
 
     useEffect(() => {
         setRerenderCount(prevCount => prevCount + 1);
@@ -116,4 +89,4 @@ const Chart: React.FC<ChartProps> = ({ data, fitContent, theme, feature }) => {
     );
 };
 
-export default Chart;
+export default OHLC;
