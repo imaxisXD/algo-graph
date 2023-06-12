@@ -22,11 +22,11 @@ const OHLC: React.FC<ChartProps> = ({ data, fitContent, theme, feature }) => {
     const chartRef = useRef<IChartApi | undefined>(undefined);
     const seriesRef = useRef<ISeriesApi<'Candlestick'> | undefined>(undefined);
     const ohlcData = useRef<Array<{ time: UTCTimestamp; open: number; high: number; low: number; close: number }>>([]);
-
+    const priceData = useRef<Array<{ time: UTCTimestamp; value: string | number }>>([]);
     const [rerenderCount, setRerenderCount] = useState(0);
     const [chartData, setChartData] = useState<ChartData>(data);
 
-    const newOHLC = ohlcDataFormatter(data, 15);
+
 
     useEffect(() => {
         if (chartContainerRef.current && !chartRef.current) {
@@ -69,12 +69,40 @@ const OHLC: React.FC<ChartProps> = ({ data, fitContent, theme, feature }) => {
         }
 
         if (seriesRef.current) {
-            seriesRef.current.setData(newOHLC);
+            ohlcData.current = ohlcDataFormatter(chartData, 15);
+            seriesRef.current.setData(ohlcData.current);
         }
         if (chartRef.current) {
             chartRef.current.timeScale().fitContent();
         }
     }, []);
+
+    useEffect(() => {
+        if (feature === 'live') {
+            const interval = setInterval(() => {
+                const lastDataPoint = chartData[chartData.length - 1];
+                const currentDate = new Date();
+                const newTimestamp = currentDate.toISOString();
+                const newValue = lastDataPoint[1] + Math.random() * 1000 - 500;
+                const newPoint: [string, number, number] = [newTimestamp, newValue, 0];
+                setChartData(prevData => [...prevData, newPoint]);
+            }, 1000);
+
+            return () => {
+                clearInterval(interval);
+            };
+        }
+    }, [chartData, feature]);
+
+    useEffect(() => {
+        if (chartRef.current && seriesRef.current) {
+            ohlcData.current = ohlcDataFormatter(chartData, 15);
+            seriesRef.current.setData(ohlcData.current);
+            if (fitContent) {
+                chartRef.current.timeScale().fitContent();
+            }
+        }
+    }, [chartData, fitContent]);
 
 
     useEffect(() => {
