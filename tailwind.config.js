@@ -7,6 +7,21 @@ module.exports = {
   ],
   theme: {
     extend: {
+      keyframes: {
+        "text": {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center',
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center',
+          },
+        }
+      },
+      animation: {
+        "text": 'text 4s ease infinite'
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':
