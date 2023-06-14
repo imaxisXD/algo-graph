@@ -26,3 +26,26 @@ export function ohlcDataFormatter(data: any, intervalInMins: number) {
     ohlcData.push({ "time": currentTimestamp / 1000 as UTCTimestamp, "open": currentOpen, "high": currentHigh, "low": currentLow, "close": currentClose });
     return (ohlcData);
 };
+
+export function addPricesAtSameTimestamp(...dataSets: Array<Array<[string, number, number]>>): Array<[string, number, number]> {
+    const combinedData: { [timestamp: string]: [number, number] } = {};
+
+    for (const dataSet of dataSets) {
+        for (const [timestamp, price, volume] of dataSet) {
+            if (combinedData[timestamp]) {
+                combinedData[timestamp][0] += price;
+                combinedData[timestamp][1] += volume;
+            } else {
+                combinedData[timestamp] = [price, volume];
+            }
+        }
+    }
+
+    const mergedData = Object.entries(combinedData).map(([timestamp, [price, volume]]) => [timestamp, price, volume]);
+
+    return mergedData;
+}
+
+
+
+

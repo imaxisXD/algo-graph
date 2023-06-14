@@ -11,8 +11,8 @@ interface ChartProps {
     theme?: {
         upColor: string;
         downColor: string;
-        borderUpColor: string;
-        borderDownColor: string;
+        wickUpColor: string;
+        wickDownColor: string;
     };
     feature?: 'live' | 'plain';
 }
@@ -22,7 +22,6 @@ const OHLC: React.FC<ChartProps> = ({ data, fitContent, theme, feature }) => {
     const chartRef = useRef<IChartApi | undefined>(undefined);
     const seriesRef = useRef<ISeriesApi<'Candlestick'> | undefined>(undefined);
     const ohlcData = useRef<Array<{ time: UTCTimestamp; open: number; high: number; low: number; close: number }>>([]);
-    const priceData = useRef<Array<{ time: UTCTimestamp; value: string | number }>>([]);
     const [rerenderCount, setRerenderCount] = useState(0);
     const [chartData, setChartData] = useState<ChartData>(data);
 
@@ -34,8 +33,8 @@ const OHLC: React.FC<ChartProps> = ({ data, fitContent, theme, feature }) => {
             seriesRef.current = chartRef.current.addCandlestickSeries({
                 upColor: theme?.upColor || '#26a69a',
                 downColor: theme?.downColor || '#ef5350',
-                wickUpColor: '#26a69a',
-                wickDownColor: '#ef5350',
+                wickUpColor: theme?.wickUpColor || '#26a69a',
+                wickDownColor: theme?.downColor || '#ef5350',
                 wickVisible: true,
                 borderVisible: false
             });
@@ -103,6 +102,10 @@ const OHLC: React.FC<ChartProps> = ({ data, fitContent, theme, feature }) => {
             }
         }
     }, [chartData, fitContent]);
+
+    useEffect(() => {
+        setChartData(data);
+    }, [data]);
 
 
     useEffect(() => {
