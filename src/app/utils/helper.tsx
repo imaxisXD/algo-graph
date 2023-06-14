@@ -43,7 +43,7 @@ export function addPricesAtSameTimestamp(...dataSets: Array<Array<[string, numbe
 
     const mergedData = Object.entries(combinedData).map(([timestamp, [price, volume]]) => [timestamp, price, volume]);
 
-    return mergedData;
+    return mergedData as any;
 }
 
 
